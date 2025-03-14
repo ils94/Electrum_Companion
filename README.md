@@ -45,6 +45,6 @@
 
 ## 📥 Download
 
-You can download **Electrum Companion** directly from the Google Play Store by clicking the link below:
+You can download **Electrum Companion** by clicking the link below:
 
 [Download Electrum Companion](https://github.com/ils94/Electrum_Companion/releases/download/v1/Electrum-Companion.apk)
