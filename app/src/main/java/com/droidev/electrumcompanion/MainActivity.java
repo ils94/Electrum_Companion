@@ -1,5 +1,6 @@
 package com.droidev.electrumcompanion;
 
+import static com.droidev.electrumcompanion.PSBTChecker.checkPSBT;
 import static com.droidev.electrumcompanion.PSBTChecker.isPSBT;
 
 import android.bluetooth.BluetoothAdapter;
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
             fileContent = removeHtmlTags(stringBuilder.toString());
 
-            if (!isPSBT(fileContent)) {
+            if (!checkPSBT(fileContent)) {
                 Toast.makeText(this, "This is not a valid PSBT.", Toast.LENGTH_SHORT).show();
 
                 return;
