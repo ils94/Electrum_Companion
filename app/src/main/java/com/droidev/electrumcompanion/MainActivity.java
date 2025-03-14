@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (sharedText != null) {
 
-            if (!isPSBT(sharedText)) {
+            if (!checkPSBT(sharedText)) {
                 Toast.makeText(this, "This is not a valid PSBT.", Toast.LENGTH_SHORT).show();
 
                 return;
