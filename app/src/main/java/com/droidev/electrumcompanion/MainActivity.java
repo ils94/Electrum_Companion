@@ -2,6 +2,8 @@ package com.droidev.electrumcompanion;
 
 import static com.droidev.electrumcompanion.PSBTChecker.checkPSBT;
 import static com.droidev.electrumcompanion.PSBTChecker.isPSBT;
+import static com.droidev.electrumcompanion.PSBTChecker.isSignedPSBT;
+import static com.droidev.electrumcompanion.PSBTChecker.isSignedTransaction;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.ClipData;
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         } else if (Intent.ACTION_SEND.equals(action) && intent.hasExtra(Intent.EXTRA_TEXT)) {
             handleSendIntent(intent);
         }
-
     }
 
     private void readTextFile(Uri uri) {
@@ -87,8 +88,7 @@ public class MainActivity extends AppCompatActivity {
             fileContent = removeHtmlTags(stringBuilder.toString());
 
             if (!checkPSBT(fileContent)) {
-                Toast.makeText(this, "This is not a valid PSBT.", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(this, "This is not a valid PSBT or SBT.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -112,15 +112,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_copy) {
-
             if (!textView.getText().toString().isEmpty()) {
-
                 copyToClipboard();
             } else {
-
                 Toast.makeText(this, "There is nothing to copy.", Toast.LENGTH_SHORT).show();
             }
-
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -131,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         ClipData clip = ClipData.newPlainText("Text File Content", fileContent);
         clipboard.setPrimaryClip(clip);
 
-        Toast.makeText(this, "PSBT copied!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Content copied!", Toast.LENGTH_SHORT).show();
 
         openElectrumApp();
     }
@@ -139,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
     private void openElectrumApp() {
         try {
             Intent launchIntent = new Intent();
-
             launchIntent.setClassName("org.electrum.electrum", "org.kivy.android.PythonActivity");
 
             Toast.makeText(this, "Opening Electrum Bitcoin Wallet...", Toast.LENGTH_SHORT).show();
@@ -157,7 +152,16 @@ public class MainActivity extends AppCompatActivity {
         intent.setType("text/plain");
 
         String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault()).format(new Date());
-        String fileName = "Electrum-PSBT_" + timeStamp + ".txt";
+        String fileName;
+
+        if (isPSBT(sharedText) || isSignedPSBT(sharedText)) {
+            fileName = "Electrum-PSBT_" + timeStamp + ".txt";
+        } else if (isSignedTransaction(sharedText)) {
+            fileName = "Electrum-SBT_" + timeStamp + ".txt";
+        } else {
+            fileName = "Electrum-Unknown_" + timeStamp + ".txt";
+        }
+
         intent.putExtra(Intent.EXTRA_TITLE, fileName);
 
         startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);
@@ -183,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
     private void checkBluetoothAndSendFile() {
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
             showSendFileDialog();
-
         } else {
             MainActivity.this.finish();
         }
@@ -200,10 +203,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendFileViaBluetooth() {
-
         if (savedFileUri == null) {
             Toast.makeText(this, "File URI is null.", Toast.LENGTH_SHORT).show();
-
             return;
         }
 
@@ -223,10 +224,8 @@ public class MainActivity extends AppCompatActivity {
         sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
 
         if (sharedText != null) {
-
             if (!checkPSBT(sharedText)) {
-                Toast.makeText(this, "This is not a valid PSBT.", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(this, "This is not a valid PSBT or SBT.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
